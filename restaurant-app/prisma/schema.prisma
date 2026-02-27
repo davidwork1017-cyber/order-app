@@ -1,0 +1,79 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Category {
+  id        String     @id @default(cuid())
+  slug      String     @unique
+  label     String
+  emoji     String     @default("🍽️")
+  sortOrder Int        @default(0)
+  createdAt DateTime   @default(now())
+  menuItems MenuItem[]
+}
+
+model MenuItem {
+  id          String      @id @default(cuid())
+  name        String
+  description String      @default("")
+  emoji       String      @default("🍽️")
+  price       Int
+  available   Boolean     @default(true)
+  sortOrder   Int         @default(0)
+  options     String      @default("[]")
+  categoryId  String
+  category    Category    @relation(fields: [categoryId], references: [id])
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  orderItems  OrderItem[]
+}
+
+model Order {
+  id            String      @id @default(cuid())
+  orderNumber   String      @unique
+  tableNumber   String
+  customerName  String      @default("")
+  guestCount    Int         @default(1)
+  notes         String      @default("")
+  subtotal      Int
+  serviceCharge Int         @default(0)
+  total         Int
+  paymentMethod String      @default("cash")
+  status        OrderStatus @default(PENDING)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  items         OrderItem[]
+}
+
+model OrderItem {
+  id         String   @id @default(cuid())
+  orderId    String
+  order      Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  menuItemId String
+  menuItem   MenuItem @relation(fields: [menuItemId], references: [id])
+  name       String
+  emoji      String
+  price      Int
+  qty        Int
+  option     String   @default("")
+  note       String   @default("")
+  subtotal   Int
+}
+
+model Setting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+}
+
+enum OrderStatus {
+  PENDING
+  PREPARING
+  READY
+  DONE
+  CANCELLED
+}
