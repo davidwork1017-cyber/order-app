@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>美食點餐 🍜</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-inner">
+      <div class="logo">🍜 美食點餐</div>
+      <button class="cart-btn" id="cartToggle">
+        🛒 購物車
+        <span class="cart-badge" id="cartBadge">0</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Category Tabs -->
+  <nav class="category-nav" id="categoryNav">
+    <button class="cat-btn active" data-cat="all">全部</button>
+    <button class="cat-btn" data-cat="rice">飯類</button>
+    <button class="cat-btn" data-cat="noodle">麵類</button>
+    <button class="cat-btn" data-cat="snack">小吃</button>
+    <button class="cat-btn" data-cat="drink">飲料</button>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="main">
+    <!-- Menu Grid -->
+    <section class="menu-section">
+      <div class="menu-grid" id="menuGrid"></div>
+    </section>
+  </main>
+
+  <!-- Cart Sidebar -->
+  <div class="cart-overlay" id="cartOverlay"></div>
+  <aside class="cart-sidebar" id="cartSidebar">
+    <div class="cart-header">
+      <h2>🛒 我的訂單</h2>
+      <button class="close-cart" id="closeCart">✕</button>
+    </div>
+    <div class="cart-items" id="cartItems">
+      <p class="cart-empty">購物車是空的，快去點餐吧！</p>
+    </div>
+    <div class="cart-footer" id="cartFooter" style="display:none">
+      <div class="cart-total">
+        <span>合計</span>
+        <span id="cartTotal">NT$ 0</span>
+      </div>
+      <button class="checkout-btn" id="checkoutBtn">確認下單</button>
+    </div>
+  </aside>
+
+  <!-- Order Success Modal -->
+  <div class="modal-overlay" id="modalOverlay" style="display:none">
+    <div class="modal">
+      <div class="modal-icon">🎉</div>
+      <h2>訂單已送出！</h2>
+      <p id="modalOrderId"></p>
+      <p class="modal-sub">預計 <strong>30 分鐘</strong> 內送達，請耐心等候。</p>
+      <button class="modal-close-btn" id="modalCloseBtn">好的，謝謝！</button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
