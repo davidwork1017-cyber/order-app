@@ -2,69 +2,317 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>美食點餐 🍜</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>點餐系統</title>
   <link rel="stylesheet" href="style.css" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#ff6b35" />
 </head>
 <body>
 
-  <!-- Header -->
-  <header class="header">
-    <div class="header-inner">
-      <div class="logo">🍜 美食點餐</div>
-      <button class="cart-btn" id="cartToggle">
-        🛒 購物車
-        <span class="cart-badge" id="cartBadge">0</span>
-      </button>
+  <!-- ===== CUSTOMER VIEW ===== -->
+  <div id="customerView">
+
+    <!-- Header -->
+    <header class="header">
+      <div class="header-inner">
+        <div class="logo" id="restaurantLogo">🍜 <span id="restaurantName">美食餐廳</span></div>
+        <div class="header-actions">
+          <button class="icon-btn" id="cartToggle" title="購物車" aria-label="開啟購物車">
+            🛒
+            <span class="cart-badge" id="cartBadge">0</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Table Info Bar -->
+    <div class="table-bar" id="tableBar">
+      <span id="tableDisplay">請輸入桌號</span>
+      <button class="table-edit-btn" id="tableEditBtn">✏️ 設定</button>
     </div>
-  </header>
 
-  <!-- Category Tabs -->
-  <nav class="category-nav" id="categoryNav">
-    <button class="cat-btn active" data-cat="all">全部</button>
-    <button class="cat-btn" data-cat="rice">飯類</button>
-    <button class="cat-btn" data-cat="noodle">麵類</button>
-    <button class="cat-btn" data-cat="snack">小吃</button>
-    <button class="cat-btn" data-cat="drink">飲料</button>
-  </nav>
+    <!-- Category Tabs -->
+    <nav class="category-nav" id="categoryNav" role="navigation" aria-label="菜單分類">
+      <!-- Populated by JS -->
+    </nav>
 
-  <!-- Main Content -->
-  <main class="main">
-    <!-- Menu Grid -->
-    <section class="menu-section">
-      <div class="menu-grid" id="menuGrid"></div>
-    </section>
-  </main>
+    <!-- Search Bar -->
+    <div class="search-bar-wrap">
+      <input type="search" class="search-bar" id="searchInput" placeholder="🔍 搜尋菜品..." autocomplete="off" />
+    </div>
 
-  <!-- Cart Sidebar -->
-  <div class="cart-overlay" id="cartOverlay"></div>
+    <!-- Main Content -->
+    <main class="main">
+      <div class="menu-grid" id="menuGrid" role="list"></div>
+      <div class="no-results" id="noResults" style="display:none">
+        <p>😕 找不到符合的菜品</p>
+      </div>
+    </main>
+
+  </div><!-- /customerView -->
+
+  <!-- ===== CART SIDEBAR ===== -->
+  <div class="cart-overlay" id="cartOverlay" role="dialog" aria-modal="true" aria-label="購物車"></div>
   <aside class="cart-sidebar" id="cartSidebar">
     <div class="cart-header">
       <h2>🛒 我的訂單</h2>
-      <button class="close-cart" id="closeCart">✕</button>
+      <button class="close-cart" id="closeCart" aria-label="關閉購物車">✕</button>
     </div>
+
+    <!-- Customer Info -->
+    <div class="cart-customer-info" id="cartCustomerInfo">
+      <div class="info-row">
+        <label>桌號</label>
+        <input type="text" id="tableInput" placeholder="例：A3" maxlength="10" />
+      </div>
+      <div class="info-row">
+        <label>姓名（選填）</label>
+        <input type="text" id="customerName" placeholder="您的姓名" maxlength="20" />
+      </div>
+      <div class="info-row">
+        <label>人數</label>
+        <input type="number" id="guestCount" placeholder="1" min="1" max="99" value="1" />
+      </div>
+    </div>
+
     <div class="cart-items" id="cartItems">
       <p class="cart-empty">購物車是空的，快去點餐吧！</p>
     </div>
+
+    <!-- Order Notes -->
+    <div class="cart-notes-wrap" id="cartNotesWrap" style="display:none">
+      <label class="notes-label">備註（整單）</label>
+      <textarea id="orderNotes" class="order-notes" placeholder="例：不要辣、過敏食材等..." maxlength="200" rows="2"></textarea>
+    </div>
+
     <div class="cart-footer" id="cartFooter" style="display:none">
       <div class="cart-total">
+        <span>小計</span>
+        <span id="cartSubtotal">NT$ 0</span>
+      </div>
+      <div class="cart-total service-charge" id="serviceChargeRow" style="display:none">
+        <span>服務費 (10%)</span>
+        <span id="serviceChargeAmt">NT$ 0</span>
+      </div>
+      <div class="cart-total grand-total">
         <span>合計</span>
         <span id="cartTotal">NT$ 0</span>
+      </div>
+      <div class="payment-methods">
+        <label class="payment-label">付款方式</label>
+        <div class="payment-options" id="paymentOptions">
+          <label class="pay-opt"><input type="radio" name="payment" value="cash" checked /> 現金</label>
+          <label class="pay-opt"><input type="radio" name="payment" value="card" /> 刷卡</label>
+          <label class="pay-opt"><input type="radio" name="payment" value="linepay" /> LINE Pay</label>
+          <label class="pay-opt"><input type="radio" name="payment" value="transfer" /> 轉帳</label>
+        </div>
       </div>
       <button class="checkout-btn" id="checkoutBtn">確認下單</button>
     </div>
   </aside>
 
-  <!-- Order Success Modal -->
-  <div class="modal-overlay" id="modalOverlay" style="display:none">
-    <div class="modal">
-      <div class="modal-icon">🎉</div>
-      <h2>訂單已送出！</h2>
-      <p id="modalOrderId"></p>
-      <p class="modal-sub">預計 <strong>30 分鐘</strong> 內送達，請耐心等候。</p>
-      <button class="modal-close-btn" id="modalCloseBtn">好的，謝謝！</button>
+  <!-- ===== ITEM DETAIL MODAL ===== -->
+  <div class="modal-overlay" id="itemModalOverlay" style="display:none" role="dialog" aria-modal="true">
+    <div class="modal item-modal">
+      <button class="modal-close-x" id="itemModalClose" aria-label="關閉">✕</button>
+      <div class="item-modal-emoji" id="itemModalEmoji"></div>
+      <h2 class="item-modal-name" id="itemModalName"></h2>
+      <p class="item-modal-desc" id="itemModalDesc"></p>
+      <div class="item-modal-price" id="itemModalPrice"></div>
+
+      <!-- Options -->
+      <div class="item-options" id="itemOptions"></div>
+
+      <!-- Special Instructions -->
+      <div class="item-note-wrap">
+        <label class="notes-label">備註（此品項）</label>
+        <textarea id="itemNote" class="order-notes" placeholder="例：不要蔥、少辣..." maxlength="100" rows="2"></textarea>
+      </div>
+
+      <!-- Qty -->
+      <div class="item-qty-row">
+        <button class="qty-btn" id="itemQtyMinus">－</button>
+        <span class="qty-num" id="itemQtyNum">1</span>
+        <button class="qty-btn" id="itemQtyPlus">＋</button>
+      </div>
+
+      <button class="checkout-btn" id="itemAddToCartBtn">加入購物車</button>
     </div>
   </div>
+
+  <!-- ===== ORDER SUCCESS MODAL ===== -->
+  <div class="modal-overlay" id="successModalOverlay" style="display:none" role="dialog" aria-modal="true">
+    <div class="modal success-modal">
+      <div class="modal-icon">🎉</div>
+      <h2>訂單已送出！</h2>
+      <p id="successOrderId" class="order-id-text"></p>
+      <p id="successTableInfo" class="modal-sub"></p>
+      <p class="modal-sub">預計 <strong>20–30 分鐘</strong> 內送達，請耐心等候。</p>
+      <div class="success-actions">
+        <button class="btn-outline" id="printReceiptBtn">🖨️ 列印收據</button>
+        <button class="checkout-btn" id="successCloseBtn">好的，謝謝！</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== ADMIN PANEL ===== -->
+  <div id="adminView" style="display:none">
+    <header class="header admin-header">
+      <div class="header-inner">
+        <div class="logo">⚙️ 後台管理</div>
+        <div class="header-actions">
+          <button class="icon-btn" id="adminLogoutBtn" title="登出">🚪 登出</button>
+        </div>
+      </div>
+    </header>
+
+    <div class="admin-tabs">
+      <button class="admin-tab active" data-tab="orders">📋 訂單管理</button>
+      <button class="admin-tab" data-tab="menu">🍽️ 菜單管理</button>
+      <button class="admin-tab" data-tab="settings">⚙️ 設定</button>
+    </div>
+
+    <!-- Orders Tab -->
+    <div class="admin-panel" id="adminOrders">
+      <div class="admin-toolbar">
+        <h2>今日訂單</h2>
+        <div class="admin-toolbar-actions">
+          <select id="orderStatusFilter">
+            <option value="all">全部狀態</option>
+            <option value="pending">待處理</option>
+            <option value="preparing">製作中</option>
+            <option value="ready">可取餐</option>
+            <option value="done">已完成</option>
+            <option value="cancelled">已取消</option>
+          </select>
+          <button class="btn-primary" id="refreshOrdersBtn">🔄 重新整理</button>
+          <button class="btn-danger" id="clearDoneOrdersBtn">🗑️ 清除已完成</button>
+        </div>
+      </div>
+      <div class="orders-grid" id="ordersGrid"></div>
+    </div>
+
+    <!-- Menu Tab -->
+    <div class="admin-panel" id="adminMenu" style="display:none">
+      <div class="admin-toolbar">
+        <h2>菜單管理</h2>
+        <button class="btn-primary" id="addMenuItemBtn">＋ 新增菜品</button>
+      </div>
+      <div class="menu-admin-grid" id="menuAdminGrid"></div>
+    </div>
+
+    <!-- Settings Tab -->
+    <div class="admin-panel" id="adminSettings" style="display:none">
+      <div class="settings-form">
+        <h2>餐廳設定</h2>
+        <div class="setting-group">
+          <label>餐廳名稱</label>
+          <input type="text" id="settingRestaurantName" maxlength="30" />
+        </div>
+        <div class="setting-group">
+          <label>餐廳 Emoji / Logo</label>
+          <input type="text" id="settingRestaurantEmoji" maxlength="4" />
+        </div>
+        <div class="setting-group">
+          <label>服務費</label>
+          <label class="toggle-label">
+            <input type="checkbox" id="settingServiceCharge" />
+            <span>收取 10% 服務費</span>
+          </label>
+        </div>
+        <div class="setting-group">
+          <label>管理員密碼</label>
+          <input type="password" id="settingAdminPassword" placeholder="留空則不更改" maxlength="30" />
+        </div>
+        <div class="setting-group">
+          <label>公告訊息（顯示於點餐頁）</label>
+          <textarea id="settingAnnouncement" maxlength="100" rows="2" placeholder="例：本日特餐：牛肉麵 $120"></textarea>
+        </div>
+        <button class="btn-primary" id="saveSettingsBtn">💾 儲存設定</button>
+        <div class="setting-group danger-zone">
+          <label>危險操作</label>
+          <button class="btn-danger" id="clearAllOrdersBtn">🗑️ 清除所有訂單</button>
+          <button class="btn-danger" id="resetMenuBtn">↩️ 重置菜單為預設</button>
+        </div>
+      </div>
+    </div>
+  </div><!-- /adminView -->
+
+  <!-- ===== ADMIN LOGIN MODAL ===== -->
+  <div class="modal-overlay" id="adminLoginOverlay" style="display:none" role="dialog" aria-modal="true">
+    <div class="modal">
+      <div class="modal-icon">🔐</div>
+      <h2>管理員登入</h2>
+      <input type="password" id="adminPasswordInput" class="admin-password-input" placeholder="請輸入密碼" maxlength="30" />
+      <p class="admin-login-error" id="adminLoginError" style="display:none">密碼錯誤，請再試一次</p>
+      <div class="success-actions">
+        <button class="btn-outline" id="adminLoginCancelBtn">取消</button>
+        <button class="checkout-btn" id="adminLoginConfirmBtn">登入</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MENU ITEM EDIT MODAL ===== -->
+  <div class="modal-overlay" id="menuEditOverlay" style="display:none" role="dialog" aria-modal="true">
+    <div class="modal menu-edit-modal">
+      <h2 id="menuEditTitle">新增菜品</h2>
+      <input type="hidden" id="editItemId" />
+      <div class="edit-form-group">
+        <label>Emoji 圖示</label>
+        <input type="text" id="editEmoji" maxlength="4" placeholder="🍜" />
+      </div>
+      <div class="edit-form-group">
+        <label>名稱 *</label>
+        <input type="text" id="editName" maxlength="30" placeholder="菜品名稱" />
+      </div>
+      <div class="edit-form-group">
+        <label>描述</label>
+        <textarea id="editDesc" maxlength="80" rows="2" placeholder="菜品描述"></textarea>
+      </div>
+      <div class="edit-form-group">
+        <label>分類 *</label>
+        <select id="editCat"></select>
+      </div>
+      <div class="edit-form-group">
+        <label>價格 (NT$) *</label>
+        <input type="number" id="editPrice" min="0" max="99999" placeholder="0" />
+      </div>
+      <div class="edit-form-group">
+        <label>狀態</label>
+        <label class="toggle-label">
+          <input type="checkbox" id="editAvailable" checked />
+          <span>供應中</span>
+        </label>
+      </div>
+      <div class="edit-form-group">
+        <label>選項（逗號分隔，例：小辣,中辣,大辣）</label>
+        <input type="text" id="editOptions" placeholder="選項1,選項2,選項3" maxlength="100" />
+      </div>
+      <p class="edit-error" id="editError" style="display:none"></p>
+      <div class="success-actions">
+        <button class="btn-outline" id="menuEditCancelBtn">取消</button>
+        <button class="checkout-btn" id="menuEditSaveBtn">儲存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== ANNOUNCEMENT BAR ===== -->
+  <div class="announcement-bar" id="announcementBar" style="display:none">
+    <span id="announcementText"></span>
+    <button class="ann-close" id="annCloseBtn">✕</button>
+  </div>
+
+  <!-- ===== ADMIN TRIGGER (hidden footer link) ===== -->
+  <footer class="app-footer">
+    <span class="admin-trigger" id="adminTrigger" title="管理員">⚙️</span>
+  </footer>
+
+  <!-- ===== TOAST ===== -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- ===== PRINT RECEIPT ===== -->
+  <div id="printArea" style="display:none"></div>
 
   <script src="app.js"></script>
 </body>
